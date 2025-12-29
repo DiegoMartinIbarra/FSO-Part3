@@ -32,6 +32,26 @@ app.get('/api/persons', (request, response) => {
   response.json(persons)
 })
 
+
+app.get('/info', (request, response) => {
+ let personsCounter = persons.length;
+ const now = new Date().toString();
+ const html =  '<p>Phonebook has info for ' + personsCounter + ' people</p>' + '<p>' + now + '</p>';
+  response.send(html)
+})
+
+
+app.get('/api/persons/:id', (request, response) => {
+     const id = request.params.id;
+     const person = persons.find(person => person.id == id)
+     if (person){
+        response.json(person)
+     }else{
+        response.status(404).send({ error: 'person not found' });
+     }
+  
+})
+
 const PORT = 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
