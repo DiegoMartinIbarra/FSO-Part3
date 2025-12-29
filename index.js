@@ -65,10 +65,23 @@ const generateId = () => {
 
 app.post('/api/persons', (request, response) => {
   const body = request.body;
-
-if (!body || !body.name || !body.number) {
+    
+  if (!body.name) 
+  {
     return response.status(400).json({ 
-      error: 'content missing' 
+      error: 'name missing' 
+    })
+  }
+  else if (!body.number) 
+  {
+    return response.status(400).json({ 
+      error: 'number missing' 
+    })
+  }
+  else if(persons.find(person => person.name.toLowerCase() === body.name.toLowerCase()))
+  {
+    return response.status(400).json({ 
+      error: 'User alredy added to the phonebook' 
     })
   }
 
