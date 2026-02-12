@@ -5,35 +5,13 @@ app.use(express.json())
 const cors = require('cors')
 app.use(cors())
 app.use(express.static('dist'))
+require('dotenv').config()
+const Persons = require('./models/persons')
 
 morgan.token('body', function getBody(req) {
   return req.body ? JSON.stringify(req.body) : "-";
 })
 app.use(morgan(':method :url :body :response-time'))
-
-
-let persons = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
 
 app.get('/api/persons', (request, response) => {
   response.json(persons)
@@ -54,12 +32,15 @@ app.get('/info', (request, response) => {
 
 app.get('/api/persons/:id', (request, response) => {
      const id = request.params.id;
-     const person = persons.find(person => person.id == id)
+   /*  const person = persons.find(person => person.id == id)
      if (person){
         response.json(person)
      }else{
         response.status(404).send({ error: 'person not found' });
-     }
+     }*/
+    Persons.findById(request.params.id).then(note => {
+    response.json(person)
+  })
   
 })
 
@@ -72,35 +53,30 @@ const generateId = () => {
 }
 
 app.post('/api/persons', (request, response) => {
-  const body = request.body;
-    
-  if (!body.name) 
-  {
+  const body = request.body
+
+  if (!body.name || !body.number) {
     return response.status(400).json({ 
-      error: 'name missing' 
-    })
-  }
-  else if (!body.number) 
-  {
-    return response.status(400).json({ 
-      error: 'number missing' 
-    })
-  }
-  else if(persons.find(person => person.name.toLowerCase() === body.name.toLowerCase()))
-  {
-    return response.status(400).json({ 
-      error: 'User alredy added to the phonebook' 
+      error: 'name or number missing' 
     })
   }
 
-  const person = {
+  // 1. Creamos una instancia del modelo 'Persons' (el que importaste arriba)
+  // Nota: Usamos 'const person' en singular para no confundir con el Modelo
+  const person = new Persons({
     name: body.name,
     number: body.number,
-    id: generateId(),
-  }
+  
+  })
 
-  persons = persons.concat(person);
-  response.json(person)
+  // 2. Guardamos en la base de datos
+  person.save().then(savedPerson => {
+    response.json(savedPerson)
+  })
+  .catch(error => {
+    console.log(error)
+    response.status(500).send({ error: 'failed to save to database' })
+  })
 })
 
 
