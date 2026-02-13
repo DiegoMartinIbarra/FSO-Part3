@@ -14,7 +14,9 @@ morgan.token('body', function getBody(req) {
 app.use(morgan(':method :url :body :response-time'))
 
 app.get('/api/persons', (request, response) => {
-  response.json(persons)
+  Persons.find({}).then(result => {
+    response.json(result)
+  })
 })
 
 app.get('/', (request, response) => {
@@ -60,16 +62,13 @@ app.post('/api/persons', (request, response) => {
       error: 'name or number missing' 
     })
   }
-
-  // 1. Creamos una instancia del modelo 'Persons' (el que importaste arriba)
-  // Nota: Usamos 'const person' en singular para no confundir con el Modelo
+//creo una instancia del schema
   const person = new Persons({
     name: body.name,
     number: body.number,
   
   })
-
-  // 2. Guardamos en la base de datos
+//Guardo los datos en la bd
   person.save().then(savedPerson => {
     response.json(savedPerson)
   })
