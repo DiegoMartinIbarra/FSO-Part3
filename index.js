@@ -16,7 +16,10 @@ app.use(morgan(':method :url :body :response-time'))
 app.get('/api/persons', (request, response) => {
   Persons.find({}).then(result => {
     response.json(result)
-  })
+  }).catch(error => {
+      console.log(error)
+      response.status(400).send({ error: 'error getting the persons list' })
+    })
 })
 
 app.get('/', (request, response) => {
@@ -27,32 +30,22 @@ app.get('/', (request, response) => {
 app.get('/info', (request, response) => {
  let personsCounter = persons.length;
  const now = new Date().toString();
- const html =  '<p>Phonebook has info for ' + personsCounter + ' people</p>' + '<p>' + now + '</p>';
+ const html =  '<p>Phonebook info</p>' + '<p>' + now + '</p>';
   response.send(html)
 })
 
 
 app.get('/api/persons/:id', (request, response) => {
      const id = request.params.id;
-   /*  const person = persons.find(person => person.id == id)
-     if (person){
-        response.json(person)
-     }else{
-        response.status(404).send({ error: 'person not found' });
-     }*/
-    Persons.findById(request.params.id).then(note => {
+    Persons.findById(request.params.id).then(result => {
     response.json(person)
-  })
+  }).catch(error => {
+      console.log(error)
+      response.status(400).send({ error: 'error getting the person' })
+    })
   
 })
 
-
-const generateId = () => {
-  const maxId = persons.length > 0
-    ? Math.max(...persons.map(p => p.id))
-    : 0
-  return maxId + 1
-}
 
 app.post('/api/persons', (request, response) => {
   const body = request.body
@@ -74,7 +67,7 @@ app.post('/api/persons', (request, response) => {
   })
   .catch(error => {
     console.log(error)
-    response.status(500).send({ error: 'failed to save to database' })
+    response.status(500).send({ error: 'failed to save in database' })
   })
 })
 
@@ -88,7 +81,7 @@ app.delete('/api/persons/:id', (request, response, next) => {
     })
     .catch(error => {
       console.log(error)
-      response.status(400).send({ error: 'malformatted id' })
+      response.status(400).send({ error: 'error deleating the person' })
     })
 })
 
